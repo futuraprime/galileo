@@ -19,16 +19,29 @@ h1, h2, h3 {
   @extend .serif-display;
 }
 
+fslh(value) {
+  font-size: value;
+  line-height: value;
+}
+
 h1 {
   font-style: italic;
-  font-size: 60px;
-  line-height: 60px;
-  font-size: 8vw;
-  line-height: 8vw;
+  font-weight: 900;
+  fslh: 60px;
+  fslh: 8vw;
 
   @media (max-width: 480px) {
-    font-size: 12vw;
-    line-height: 12vw;
+    fslh: 12vw;
+  }
+}
+
+h2 {
+  font-weight: 400;
+  fslh: 30px;
+  fslh: 4vw;
+
+  @media (max-width: 480px) {
+    fslh: 6vw;
   }
 }
 
