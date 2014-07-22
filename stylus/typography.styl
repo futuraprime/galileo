@@ -24,11 +24,18 @@ fslh(value) {
   line-height: value;
 }
 
+optimizeText() {
+  text-rendering: optimizeLegibility;
+  text-rendering: geometricPrecision;
+}
+
 h1 {
   font-style: italic;
   font-weight: 900;
   fslh: 60px;
   fslh: 8vw;
+
+  optimizeText();
 
   @media (max-width: 480px) {
     fslh: 12vw;
@@ -39,6 +46,8 @@ h2 {
   font-weight: 400;
   fslh: 30px;
   fslh: 4vw;
+
+  text-rendering: optimizeLegibility;
 
   @media (max-width: 480px) {
     fslh: 6vw;
