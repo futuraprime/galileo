@@ -10,8 +10,8 @@
 
 body {
   @extend .serif;
-  font-size: 20px;
-  line-height: 28px;
+  font-size: 18px;
+  line-height: 21px;
   color: #222;
 }
 
@@ -38,19 +38,27 @@ h1 {
   optimizeText();
 
   @media (max-width: 480px) {
-    fslh: 12vw;
+    fslh: 11vw;
+  }
+
+  @media (min-width: 960px) {
+    fslh: 78px;
   }
 }
 
 h2 {
   font-weight: 400;
-  fslh: 30px;
+  fslh: 28px;
   fslh: 4vw;
 
   text-rendering: optimizeLegibility;
 
   @media (max-width: 480px) {
     fslh: 6vw;
+  }
+
+  @media(min-width: 960px) {
+    fslh: 40px;
   }
 }
 
@@ -60,9 +68,13 @@ h2 {
 }
 
 .intro-text, .section-text {
-  margin: 10px;
+  margin: 10px 0;
   min-width: 300px;
   max-width: 500px;
+
+  &.right {
+    margin: 10px 0 10px auto;
+  }
 }
 
 p + p,
