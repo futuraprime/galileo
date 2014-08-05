@@ -39,3 +39,11 @@ function playSound(buffer) {
 // getSound('audio/4th_String_D_64kb.mp3').then(function(buffer) { playSound(buffer); });
 // getSound('audio/5th_String_A_64kb.mp3').then(function(buffer) { playSound(buffer); });
 // getSound('audio/6th_String_E_64kb.mp3').then(function(buffer) { playSound(buffer); });
+
+var s = Snap("#interactive");
+var ramp = s.polygon();
+
+function drawRamp(x, y, w, h) {
+  ramp.attr({points: [x,y,x,y+h,x+w,y+h]});
+}
+drawRamp(20, 20, 600, 100);
