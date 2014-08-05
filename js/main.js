@@ -59,6 +59,7 @@ Ramp.prototype.draw = function(x, y, w, h, padding) {
   this.representation.attr({points: [x,y,x,y+h,x+w,y+h]});
 };
 Ramp.prototype.getPositionByPercent = function(percent) {
+  percent = percent / 100;
   return {
     x : this.x + this.w * percent,
     y : this.y + this.h * percent
@@ -68,13 +69,19 @@ Ramp.prototype.getPositionByPercent = function(percent) {
 Ramp.prototype.placeBall = function(ball, position) {
   position = this.getPositionByPercent(position || 0);
   position.y -= ball.r;
+  ball.ramp = this;
   ball.move(position);
+};
+Ramp.prototype.release = function(ball, duration) {
+  if(ball.ramp != this) { return; }
+  // insert gravity!
 };
 
 function Ball(paper, radius) {
   this.x = 0;
   this.y = 0;
   this.r = radius || 10;
+  this.speed = 0;
   this.representation = paper.circle(this.x, this.y, this.r);
 }
 Ball.prototype.move = function(x,y) {
@@ -92,4 +99,5 @@ Ball.prototype.move = function(x,y) {
 var ramp = new Ramp(s);
 ramp.draw(0, 0, width, height, 20);
 var ball = new Ball(s);
-ramp.placeBall(ball, 0);
+ramp.placeBall(ball, 1);
+ramp.release(ball, 5000);
