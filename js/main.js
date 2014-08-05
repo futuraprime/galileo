@@ -62,7 +62,7 @@ Ramp.prototype.getPositionByPercent = function(percent) {
   percent = percent / 100;
   return {
     x : this.x + this.w * percent,
-    y : this.y + this.h * percent
+    y : this.y + this.h * Math.min(percent, 1)
   };
 };
 // ball is a Ball; position is a percent of the way down the ramp
@@ -72,9 +72,25 @@ Ramp.prototype.placeBall = function(ball, position) {
   ball.ramp = this;
   ball.move(position);
 };
-Ramp.prototype.release = function(ball, duration) {
+Ramp.prototype.release = function(ball, factor) {
+  var self = this;
+  factor = factor || 1;
   if(ball.ramp != this) { return; }
   // insert gravity!
+  // ok, to do this I'm going to need some calculus.
+  // we know things fall at t^2 speed... so if it's at 
+  // p=0 at t=0, at t=1 it'll be at p=32 and at t=2 it'll be at
+  // p=96
+  ball.start = null;
+  ball.stepFn = function(timestamp) {
+    if(!ball.start) { ball.start = timestamp; }
+    var runningTime = timestamp - ball.start;
+
+    self.placeBall(ball, Math.pow((runningTime/1000), 2) * factor);
+    requestAnimationFrame(ball.stepFn);
+  };
+  requestAnimationFrame(ball.stepFn);
+
 };
 
 function Ball(paper, radius) {
@@ -100,4 +116,4 @@ var ramp = new Ramp(s);
 ramp.draw(0, 0, width, height, 20);
 var ball = new Ball(s);
 ramp.placeBall(ball, 1);
-ramp.release(ball, 5000);
+ramp.release(ball, 4);
