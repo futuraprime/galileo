@@ -43,7 +43,53 @@ function playSound(buffer) {
 var s = Snap("#interactive");
 var ramp = s.polygon();
 
-function drawRamp(x, y, w, h) {
-  ramp.attr({points: [x,y,x,y+h,x+w,y+h]});
+var $svg = $('#interactive');
+var width = $svg.width();
+var height = $svg.height();
+
+function Ramp(paper) {
+  this.representation = paper.polygon();
 }
-drawRamp(20, 20, 600, 100);
+Ramp.prototype.draw = function(x, y, w, h, padding) {
+  padding = this.padding = padding || 0;
+  x = this.x = x + padding;
+  y = this.y = y + padding;
+  w = this.w = w - padding * 2;
+  h = this.h = h - padding * 2;
+  this.representation.attr({points: [x,y,x,y+h,x+w,y+h]});
+};
+Ramp.prototype.getPositionByPercent = function(percent) {
+  return {
+    x : this.x + this.w * percent,
+    y : this.y + this.h * percent
+  };
+};
+// ball is a Ball; position is a percent of the way down the ramp
+Ramp.prototype.placeBall = function(ball, position) {
+  position = this.getPositionByPercent(position || 0);
+  position.y -= ball.r;
+  ball.move(position);
+};
+
+function Ball(paper, radius) {
+  this.x = 0;
+  this.y = 0;
+  this.r = radius || 10;
+  this.representation = paper.circle(this.x, this.y, this.r);
+}
+Ball.prototype.move = function(x,y) {
+  // object overload
+  if(_.isObject(x)) { y = x.y; x = x.x; }
+
+  this.x = x;
+  this.y = y;
+  this.representation.attr({
+    cx : x,
+    cy : y
+  });
+};
+
+var ramp = new Ramp(s);
+ramp.draw(0, 0, width, height, 20);
+var ball = new Ball(s);
+ramp.placeBall(ball, 0);
