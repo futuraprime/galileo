@@ -1,4 +1,5 @@
 var AudioContext = window.AudioContext || window.webkitAudioContext;
+// var requestAnimationFrame = window.requestAnimationFrame;
 
 if(!AudioContext) {
   alert('sorry, you\'ll need a different browser');
@@ -67,6 +68,11 @@ Ramp.prototype.getPositionByPercent = function(percent) {
 };
 // ball is a Ball; position is a percent of the way down the ramp
 Ramp.prototype.placeBall = function(ball, position) {
+  ball.loopBreak = true;
+  this._placeBall.apply(this, arguments);
+};
+Ramp.prototype._placeBall = function(ball, position) {
+  ball.percent = position;
   position = this.getPositionByPercent(position || 0);
   position.y -= ball.r;
   ball.ramp = this;
@@ -74,6 +80,7 @@ Ramp.prototype.placeBall = function(ball, position) {
 };
 Ramp.prototype.release = function(ball, factor) {
   var self = this;
+  var initialPosition = ball.percent;
   factor = factor || 1;
   if(ball.ramp != this) { return; }
   // insert gravity!
@@ -82,12 +89,20 @@ Ramp.prototype.release = function(ball, factor) {
   // p=0 at t=0, at t=1 it'll be at p=32 and at t=2 it'll be at
   // p=96
   ball.start = null;
+  ball.loopBreak = false;
   ball.stepFn = function(timestamp) {
     if(!ball.start) { ball.start = timestamp; }
+    if(ball.loopBreak) {
+      ball.loopBreak = false;
+      return;
+    }
     var runningTime = timestamp - ball.start;
 
-    self.placeBall(ball, Math.pow((runningTime/1000), 2) * factor);
-    requestAnimationFrame(ball.stepFn);
+    var distance = Math.pow((runningTime/1000), 2) * factor + initialPosition;
+    self._placeBall(ball, distance);
+    if(distance < 120) {
+      requestAnimationFrame(ball.stepFn);
+    }
   };
   requestAnimationFrame(ball.stepFn);
 
@@ -116,4 +131,4 @@ var ramp = new Ramp(s);
 ramp.draw(0, 0, width, height, 20);
 var ball = new Ball(s);
 ramp.placeBall(ball, 1);
-ramp.release(ball, 4);
+// ramp.release(ball, 4);
