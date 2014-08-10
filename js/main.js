@@ -127,6 +127,13 @@ Ball.prototype.move = function(x,y) {
   });
 };
 
+function Pinger(paper, position) {
+  this.x = 0;
+  this.y = 0;
+  this.representation = paper.rect(this.x, this.y, 10, height);
+}
+new Pinger(s, 10);
+
 var ramp = new Ramp(s);
 ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
