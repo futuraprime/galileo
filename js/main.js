@@ -129,6 +129,33 @@ Ball.prototype.move = function(x,y) {
 
 var ramp = new Ramp(s);
 ramp.draw(0, 0, width, height, 20);
-var ball = new Ball(s);
-ramp.placeBall(ball, 1);
+// var ball = new Ball(s);
+// ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
+
+var RampFsm = machina.Fsm.extend({
+  // maybe properly segment all this later?
+  initialize : function(paper) {
+    this.ramp = ramp;
+    this.ball = new Ball(paper);
+    this.ramp.placeBall(this.ball, 1);
+  },
+  states : {
+    'active' : {
+      _onEnter : function() {
+
+      },
+      _onExit : function() {
+
+      },
+      reset : function() {
+        this.ramp.placeBall(this.ball, 1);
+      },
+      start : function() {
+        this.ramp.release(this.ball, 4);
+      }
+    }
+  },
+  initialState : 'active'
+});
+var rampFsm = new RampFsm(s);
