@@ -34,6 +34,22 @@ function playSound(buffer) {
   source.start(0);
 }
 
+var audioFiles = [
+  'audio/1st_String_E_64kb.mp3',
+  'audio/2nd_String_B_64kb.mp3',
+  'audio/3rd_String_G_64kb.mp3',
+  'audio/4th_String_D_64kb.mp3',
+  'audio/5th_String_A_64kb.mp3',
+  'audio/6th_String_E_64kb.mp3'
+];
+var audios = [];
+
+for(var i=0,l=audioFiles.length; i<l; ++i) (function(i) {
+  getSound(audioFiles[i]).then(function(buffer) {
+    audios[i] = buffer;
+  });
+})(i);
+
 // getSound('audio/1st_String_E_64kb.mp3').then(function(buffer) { playSound(buffer); });
 // getSound('audio/2nd_String_B_64kb.mp3').then(function(buffer) { playSound(buffer); });
 // getSound('audio/3rd_String_G_64kb.mp3').then(function(buffer) { playSound(buffer); });
