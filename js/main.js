@@ -44,6 +44,7 @@ var audioFiles = [
 ];
 var audios = [];
 
+/*jshint loopfunc: true */
 for(var i=0,l=audioFiles.length; i<l; ++i) (function(i) {
   getSound(audioFiles[i]).then(function(buffer) {
     audios[i] = buffer;
@@ -147,6 +148,7 @@ function Pinger(paper, position) {
   this.x = 0;
   this.y = 0;
   this.representation = paper.rect(this.x, this.y, 10, height);
+  this.representation.drag();
 }
 new Pinger(s, 10);
 
