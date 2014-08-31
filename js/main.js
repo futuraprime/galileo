@@ -1,3 +1,10 @@
+/* use strict */
+
+// =================
+// Audio code
+//
+// This is handles setting up all the audio stuff we'll be using.
+// =================
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 // var requestAnimationFrame = window.requestAnimationFrame;
 
@@ -51,15 +58,11 @@ for(var i=0,l=audioFiles.length; i<l; ++i) (function(i) {
   });
 })(i);
 
-// getSound('audio/1st_String_E_64kb.mp3').then(function(buffer) { playSound(buffer); });
-// getSound('audio/2nd_String_B_64kb.mp3').then(function(buffer) { playSound(buffer); });
-// getSound('audio/3rd_String_G_64kb.mp3').then(function(buffer) { playSound(buffer); });
-// getSound('audio/4th_String_D_64kb.mp3').then(function(buffer) { playSound(buffer); });
-// getSound('audio/5th_String_A_64kb.mp3').then(function(buffer) { playSound(buffer); });
-// getSound('audio/6th_String_E_64kb.mp3').then(function(buffer) { playSound(buffer); });
 
+// ==============
+// Interactive!
+// ==============
 var s = Snap("#interactive");
-var ramp = s.polygon();
 
 var $svg = $('#interactive');
 var width = $svg.width();
@@ -71,9 +74,9 @@ function Ramp(paper) {
 Ramp.prototype.draw = function(x, y, w, h, padding) {
   padding = this.padding = padding || 0;
   x = this.x = x + padding;
-  y = this.y = y + padding;
+  y = this.y = y + padding + 20; //space for the pingers
   w = this.w = w - padding * 2;
-  h = this.h = h - padding * 2;
+  h = this.h = h - padding * 2 - 20;
   this.representation.attr({points: [x,y,x,y+h,x+w,y+h]});
 };
 Ramp.prototype.getPositionByPercent = function(percent) {
@@ -144,19 +147,44 @@ Ball.prototype.move = function(x,y) {
   });
 };
 
+// ============
+// Pinger
+//
+// Pingers are the little things you drag around & make noise.
+// ============
+/* jshint multistr:true */
 function Pinger(paper, position) {
-  this.x = 0;
-  this.y = 0;
-  this.representation = paper.rect(this.x, this.y, 10, height);
-  this.representation.drag();
+  this.x = position;
+  this.group = paper.group();
+  this.line = paper.line(0, 0, 0, height - 20);
+  this.representation = paper.path('M10.7,18.6L0,25l-10.7-6.4c-1.1-0.7-1.8-1.9-1.8-3.2V3.8\
+  c0-2.1,1.7-3.8,3.8-3.8H8.8c2.1,0,3.8,1.7,3.8,3.8v11.6C12.5,16.7,11.8,17.9,10.7,18.6z');
+  // TODO: incorporate padding?
+  this.group.add(this.line, this.representation);
+  this.group.attr('transform', 'translate3d('+this.x+'px,0,0)');
+  this.group.addClass('pinger');
+  this.group.drag(
+    this.onMove, this.onStart, this.onEnd,
+    this, this, this
+  );
 }
-new Pinger(s, 10);
+Pinger.prototype.onStart = function() {
+  this.moveStartX = this.x;
+};
+Pinger.prototype.onMove = function(dx, dy) {
+  this.x = this.moveStartX + dx;
+  this.group.attr('transform', 'translate3d('+this.x+'px,0,0)');
+};
+Pinger.prototype.onEnd = function() {
+
+};
 
 var ramp = new Ramp(s);
 ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
+new Pinger(s, 20);
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
