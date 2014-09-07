@@ -141,6 +141,11 @@ Ramp.prototype.attachPinger = function(pinger) {
 Ramp.prototype.updatePingerBounds = function() {
   this.pingers = _.sortBy(this.pingers, function(item) { return item.x; });
   for(var i=0,l=this.pingers.length;i<l;++i) {
+    if(i < l - 1 && this.pingers[i].x === this.pingers[i+1].x) {
+      // just to make sure we don't have directly overlapping pingers
+      this.pingers[i+1].x += 10;
+      this.pingers[i+1].moveTo(this.pingers[i+1].x);
+    }
     if(i === 0) {
       // first pinger
       this.pingers[i].lo = this.x;
@@ -185,7 +190,8 @@ Ball.prototype.move = function(x,y) {
 // Pingers are the little things you drag around & make noise.
 // ============
 /* jshint multistr:true */
-function Pinger(paper, position) {
+function Pinger(paper, audioID, position) {
+  this.audioID = audioID;
   this.x = position;
   this.group = paper.group();
   this.line = paper.line(0, 0, 0, height - 20);
@@ -200,6 +206,14 @@ function Pinger(paper, position) {
     this, this, this
   );
 }
+Pinger.prototype.ping = function() {
+  playSound(audios[this.audioID]);
+};
+Pinger.prototype.moveTo = function(position) {
+  console.log('moving to', position);
+  this.x = position;
+  this.group.attr('transform', 'translate3d('+this.x+'px,0,0)');
+};
 Pinger.prototype.addBounds = function(a, b) {
   this.lo = a > b ? b : a;
   this.hi = a > b ? a : b;
@@ -222,13 +236,17 @@ ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
-ramp.attachPinger(new Pinger(s, 20));
+ramp.attachPinger(new Pinger(s, 0, 60));
+ramp.attachPinger(new Pinger(s, 1, 100));
+ramp.attachPinger(new Pinger(s, 2, 300));
+ramp.attachPinger(new Pinger(s, 3, 600));
+ramp.attachPinger(new Pinger(s, 4, 900));
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
   initialize : function(paper) {
     this.ramp = ramp;
-    this.ball = new Ball(paper);
+    window.ball = this.ball = new Ball(paper);
     this.ramp.placeBall(this.ball, 1);
   },
   states : {
