@@ -117,6 +117,13 @@ Ramp.prototype.release = function(ball, factor) {
   // p=96
   ball.start = null;
   ball.loopBreak = false;
+
+  // cool beans bro
+  // now we gotta make some noise
+  var pingerLocations = _.pluck(this.pingers, 'x');
+  var nextPinger = this.pingers[0];
+  var pingerIndex = 0;
+
   ball.stepFn = function(timestamp) {
     if(!ball.start) { ball.start = timestamp; }
     if(ball.loopBreak) {
@@ -127,6 +134,10 @@ Ramp.prototype.release = function(ball, factor) {
 
     var distance = Math.pow((runningTime/1000), 2) * factor + initialPosition;
     self._placeBall(ball, distance);
+    if(nextPinger && ball.x > nextPinger.x) {
+      nextPinger.ping();
+      nextPinger = self.pingers[++pingerIndex];
+    }
     if(distance < 120) {
       requestAnimationFrame(ball.stepFn);
     }
@@ -237,11 +248,12 @@ ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
-ramp.attachPinger(new Pinger(s, 0, 60));
-ramp.attachPinger(new Pinger(s, 1, 100));
+ramp.attachPinger(new Pinger(s, 0, 100));
+ramp.attachPinger(new Pinger(s, 1, 200));
 ramp.attachPinger(new Pinger(s, 2, 300));
-ramp.attachPinger(new Pinger(s, 3, 600));
-ramp.attachPinger(new Pinger(s, 4, 900));
+ramp.attachPinger(new Pinger(s, 3, 400));
+ramp.attachPinger(new Pinger(s, 4, 500));
+ramp.attachPinger(new Pinger(s, 5, 600));
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
