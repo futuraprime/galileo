@@ -68,8 +68,15 @@ var $svg = $('#interactive');
 var width = $svg.width();
 var height = $svg.height();
 
+// =======
+// Ramp
+//
+// Ramp is... you know, the ramp.
+// Balls and Pingers get attached to the ramp, so it sort of runs the show.
+// =======
 function Ramp(paper) {
   this.representation = paper.polygon();
+  this.pingers = [];
 }
 Ramp.prototype.draw = function(x, y, w, h, padding) {
   padding = this.padding = padding || 0;
@@ -125,9 +132,34 @@ Ramp.prototype.release = function(ball, factor) {
     }
   };
   requestAnimationFrame(ball.stepFn);
-
+};
+Ramp.prototype.attachPinger = function(pinger) {
+  this.pingers.push(pinger);
+  pinger.ramp = this;
+  this.updatePingerBounds();
+};
+Ramp.prototype.updatePingerBounds = function() {
+  this.pingers = _.sortBy(this.pingers, function(item) { return item.x; });
+  for(var i=0,l=this.pingers.length;i<l;++i) {
+    if(i === 0) {
+      // first pinger
+      this.pingers[i].lo = this.x;
+    } else {
+      this.pingers[i].lo = this.pingers[i-1].x;
+    }
+    if(i === l - 1) {
+      // last pinger
+      this.pingers[i].hi = this.x + this.w;
+    } else {
+      this.pingers[i].hi = this.pingers[i + 1].x;
+    }
+  }
 };
 
+
+// ========
+// Ball
+// ========
 function Ball(paper, radius) {
   this.x = 0;
   this.y = 0;
@@ -168,15 +200,21 @@ function Pinger(paper, position) {
     this, this, this
   );
 }
+Pinger.prototype.addBounds = function(a, b) {
+  this.lo = a > b ? b : a;
+  this.hi = a > b ? a : b;
+};
 Pinger.prototype.onStart = function() {
   this.moveStartX = this.x;
 };
 Pinger.prototype.onMove = function(dx, dy) {
-  this.x = this.moveStartX + dx;
+  // we're just keeping the pinger in bounds here
+  this.x = Math.max(Math.min(this.moveStartX + dx, this.hi), this.lo);
   this.group.attr('transform', 'translate3d('+this.x+'px,0,0)');
 };
 Pinger.prototype.onEnd = function() {
-
+  this.moveStart = undefined;
+  if(this.ramp) { this.ramp.updatePingerBounds(); }
 };
 
 var ramp = new Ramp(s);
@@ -184,7 +222,7 @@ ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
-new Pinger(s, 20);
+ramp.attachPinger(new Pinger(s, 20));
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
