@@ -220,6 +220,7 @@ Pinger.prototype.addBounds = function(a, b) {
 };
 Pinger.prototype.onStart = function() {
   this.moveStartX = this.x;
+  this.ping();
 };
 Pinger.prototype.onMove = function(dx, dy) {
   // we're just keeping the pinger in bounds here
