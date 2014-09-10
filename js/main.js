@@ -75,6 +75,7 @@ var height = $svg.height();
 // Balls and Pingers get attached to the ramp, so it sort of runs the show.
 // =======
 function Ramp(paper) {
+  this.paper = paper;
   this.representation = paper.polygon();
   this.pingers = [];
 }
@@ -92,6 +93,9 @@ Ramp.prototype.getPositionByPercent = function(percent) {
     x : this.x + this.w * percent,
     y : this.y + this.h * Math.min(percent, 1)
   };
+};
+Ramp.prototype.getPercentByXPosition = function(position) {
+  return 100 * (position - this.x) / this.w;
 };
 // ball is a Ball; position is a percent of the way down the ramp
 Ramp.prototype.placeBall = function(ball, position) {
@@ -148,6 +152,12 @@ Ramp.prototype.attachPinger = function(pinger) {
   this.pingers.push(pinger);
   pinger.ramp = this;
   this.updatePingerBounds();
+};
+Ramp.prototype.createPinger = function(percent, audio) {
+  var pos = this.getPositionByPercent(percent);
+  this.attachPinger(
+    new Pinger(this.paper, audio, this.getPositionByPercent(percent).x)
+  );
 };
 Ramp.prototype.updatePingerBounds = function() {
   this.pingers = _.sortBy(this.pingers, function(item) { return item.x; });
@@ -248,18 +258,18 @@ ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
-ramp.attachPinger(new Pinger(s, 0, 100));
-ramp.attachPinger(new Pinger(s, 1, 200));
-ramp.attachPinger(new Pinger(s, 2, 300));
-ramp.attachPinger(new Pinger(s, 3, 400));
-ramp.attachPinger(new Pinger(s, 4, 500));
-ramp.attachPinger(new Pinger(s, 5, 600));
+ramp.createPinger(15, 0);
+ramp.createPinger(30, 1);
+ramp.createPinger(45, 2);
+ramp.createPinger(60, 3);
+ramp.createPinger(75, 4);
+ramp.createPinger(90, 5);
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
   initialize : function(paper) {
     this.ramp = ramp;
-    window.ball = this.ball = new Ball(paper);
+    this.ball = new Ball(paper);
     this.ramp.placeBall(this.ball, 1);
   },
   states : {
@@ -274,7 +284,7 @@ var RampFsm = machina.Fsm.extend({
         this.ramp.placeBall(this.ball, 1);
       },
       start : function() {
-        this.ramp.release(this.ball, 4);
+        this.ramp.release(this.ball, 7);
       }
     }
   },
