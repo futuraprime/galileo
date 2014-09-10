@@ -159,6 +159,23 @@ Ramp.prototype.createPinger = function(percent, audio) {
     new Pinger(this.paper, audio, this.getPositionByPercent(percent).x)
   );
 };
+Ramp.prototype.createPingerSet = function(pingerSet) {
+  // a pingerSet is an array of tuples of percent and sound:
+  // [[15,0], [30,1], [45,2]], e.g.
+  for(var i=0,l=pingerSet.length;i<l;++i) {
+    this.createPinger.apply(this, pingerSet[i]);
+  }
+};
+Ramp.prototype.reportPingerSet = function() {
+  var pingerSet = [];
+  for(var i=0,l=this.pingers.length;i<l;++i) {
+    pingerSet.push([
+      this.getPercentByXPosition(this.pingers[i].x),
+      this.pingers[i].audioID
+    ]);
+  }
+  return pingerSet;
+};
 Ramp.prototype.updatePingerBounds = function() {
   this.pingers = _.sortBy(this.pingers, function(item) { return item.x; });
   for(var i=0,l=this.pingers.length;i<l;++i) {
@@ -258,12 +275,7 @@ ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
-ramp.createPinger(15, 0);
-ramp.createPinger(30, 1);
-ramp.createPinger(45, 2);
-ramp.createPinger(60, 3);
-ramp.createPinger(75, 4);
-ramp.createPinger(90, 5);
+ramp.createPingerSet([[15,0],[30,1],[45,2],[60,3],[75,4],[90,5]]);
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
