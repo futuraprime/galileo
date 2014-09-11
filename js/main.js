@@ -283,9 +283,13 @@ Pinger.prototype.onEnd = function() {
   if(this.ramp) { this.ramp.updatePingerBounds(); }
 };
 
-// var ball = new Ball(s);
-// ramp.placeBall(ball, 1);
-// ramp.release(ball, 4);
+
+// ========
+// Graph
+//
+// this plots the positions of the pingers
+// ========
+
 
 var RampFsm = machina.Fsm.extend({
   initialize : function(paper) {
