@@ -289,7 +289,7 @@ var RampFsm = machina.Fsm.extend({
         this.ramp.placeBall(this.ball, 1);
         this.ramp.createPingerSet([[15,0],[30,1],[45,2],[60,3],[75,4],[90,5]]);
 
-        $('#interact').click(function() {
+        this.$interact = $('#interact').click(function() {
           self.handle('swap');
         });
 
@@ -299,6 +299,7 @@ var RampFsm = machina.Fsm.extend({
     'ready' : {
       _onEnter : function() {
         this.ramp.placeBall(this.ball, 1);
+        this.$interact.text('Release');
       },
       swap : function() {
         this.transition('rolling');
@@ -307,6 +308,7 @@ var RampFsm = machina.Fsm.extend({
     'rolling' : {
       _onEnter : function() {
         this.ramp.release(this.ball, 7);
+        this.$interact.text('Reset');
       },
       swap : function() {
         this.transition('ready');
