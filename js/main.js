@@ -270,36 +270,49 @@ Pinger.prototype.onEnd = function() {
   if(this.ramp) { this.ramp.updatePingerBounds(); }
 };
 
-var ramp = new Ramp(s);
-ramp.draw(0, 0, width, height, 20);
 // var ball = new Ball(s);
 // ramp.placeBall(ball, 1);
 // ramp.release(ball, 4);
-ramp.createPingerSet([[15,0],[30,1],[45,2],[60,3],[75,4],[90,5]]);
 
 var RampFsm = machina.Fsm.extend({
   // maybe properly segment all this later?
   initialize : function(paper) {
-    this.ramp = ramp;
-    this.ball = new Ball(paper);
-    this.ramp.placeBall(this.ball, 1);
+    this.paper = paper;
   },
   states : {
-    'active' : {
+    'ramp_setup' : {
       _onEnter : function() {
+        var self = this;
+        var ramp = this.ramp = new Ramp(this.paper);
+        this.ramp.draw(0, 0, width, height, 20);
+        this.ball = new Ball(this.paper);
+        this.ramp.placeBall(this.ball, 1);
+        this.ramp.createPingerSet([[15,0],[30,1],[45,2],[60,3],[75,4],[90,5]]);
 
-      },
-      _onExit : function() {
+        $('#interact').click(function() {
+          self.handle('swap');
+        });
 
-      },
-      reset : function() {
+        this.transition('ready');
+      }
+    },
+    'ready' : {
+      _onEnter : function() {
         this.ramp.placeBall(this.ball, 1);
       },
-      start : function() {
+      swap : function() {
+        this.transition('rolling');
+      }
+    },
+    'rolling' : {
+      _onEnter : function() {
         this.ramp.release(this.ball, 7);
+      },
+      swap : function() {
+        this.transition('ready');
       }
     }
   },
-  initialState : 'active'
+  initialState : 'ramp_setup'
 });
 var rampFsm = new RampFsm(s);
