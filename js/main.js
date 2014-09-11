@@ -166,6 +166,12 @@ Ramp.prototype.createPingerSet = function(pingerSet) {
     this.createPinger.apply(this, pingerSet[i]);
   }
 };
+Ramp.prototype.updatePingerPositions = function(positions) {
+  for(var i=0,l=this.pingers.length;i<l;++i) {
+    if(typeof positions[i] != 'number') { break; }
+    this.pingers[i].moveTo(this.getPositionByPercent(positions[i]).x, true);
+  }
+};
 Ramp.prototype.reportPingerSet = function() {
   var pingerSet = [];
   for(var i=0,l=this.pingers.length;i<l;++i) {
@@ -247,10 +253,17 @@ function Pinger(paper, audioID, position) {
 Pinger.prototype.ping = function() {
   playSound(audios[this.audioID]);
 };
-Pinger.prototype.moveTo = function(position) {
+Pinger.prototype.moveTo = function(position, animate) {
   console.log('moving to', position);
+  var self = this;
+  if(animate) {
+    Snap.animate(this.x, position, function(val) {
+      self.group.attr('transform', 'translate3d('+position+'px,0,0)');
+    }, 250);
+  } else {
+    this.group.attr('transform', 'translate3d('+position+'px,0,0)');
+  }
   this.x = position;
-  this.group.attr('transform', 'translate3d('+this.x+'px,0,0)');
 };
 Pinger.prototype.addBounds = function(a, b) {
   this.lo = a > b ? b : a;
@@ -275,9 +288,12 @@ Pinger.prototype.onEnd = function() {
 // ramp.release(ball, 4);
 
 var RampFsm = machina.Fsm.extend({
-  // maybe properly segment all this later?
   initialize : function(paper) {
     this.paper = paper;
+  },
+  solve : function() {
+    // not the solution!!!!!
+    this.ramp.updatePingerPositions([3,6,12,24,48,96]);
   },
   states : {
     'ramp_setup' : {
@@ -292,6 +308,9 @@ var RampFsm = machina.Fsm.extend({
         this.$interact = $('#interact').click(function() {
           self.handle('swap');
         });
+        this.$solve = $('#solve').click(function() {
+          self.handle('solve');
+        });
 
         this.transition('ready');
       }
@@ -301,6 +320,7 @@ var RampFsm = machina.Fsm.extend({
         this.ramp.placeBall(this.ball, 1);
         this.$interact.text('Release');
       },
+      solve : function() { return this.solve.apply(this, arguments); },
       swap : function() {
         this.transition('rolling');
       }
@@ -310,6 +330,7 @@ var RampFsm = machina.Fsm.extend({
         this.ramp.release(this.ball, 7);
         this.$interact.text('Reset');
       },
+      solve : function() { return this.solve.apply(this, arguments); },
       swap : function() {
         this.transition('ready');
       }
