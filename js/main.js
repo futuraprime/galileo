@@ -78,6 +78,7 @@ function Ramp(paper) {
   this.paper = paper;
   this.representation = paper.polygon();
   this.pingers = [];
+  this.factor = 7;
 }
 Ramp.prototype.draw = function(x, y, w, h, padding) {
   padding = this.padding = padding || 0;
@@ -109,10 +110,18 @@ Ramp.prototype._placeBall = function(ball, position) {
   ball.ramp = this;
   ball.move(position);
 };
-Ramp.prototype.release = function(ball, factor) {
+Ramp.prototype.positionFromTime = function(time, initialPosition) {
+  console.log(time, this.factor, initialPosition, time * time * this.factor + initialPosition);
+  return Math.pow(time, 2) * this.factor + initialPosition;
+};
+Ramp.prototype.timeFromPosition = function(position, initialPosition) {
+  var percent = this.getPercentByXPosition(position);
+  return Math.sqrt((percent - initialPosition) / this.factor);
+};
+Ramp.prototype.release = function(ball) {
   var self = this;
   var initialPosition = ball.percent;
-  factor = factor || 1;
+  factor = this.factor;
   if(ball.ramp != this) { return; }
   // insert gravity!
   // ok, to do this I'm going to need some calculus.
@@ -183,6 +192,14 @@ Ramp.prototype.updatePingerPositions = function(positions) {
   for(var i=0,l=this.pingers.length;i<l;++i) {
     if(typeof positions[i] != 'number') { break; }
     this.pingers[i].moveTo(this.getPositionByPercent(positions[i]).x, true);
+  }
+};
+Ramp.prototype.updatePingerTimes = function(times, initialPosition) {
+  var percent;
+  for(var i=0,l=this.pingers.length;i<l;++i) {
+    if(typeof times[i] != 'number') { break; }
+    percent = this.positionFromTime(times[i], initialPosition);
+    this.pingers[i].moveTo(this.getPositionByPercent(percent).x, true);
   }
 };
 Ramp.prototype.reportPingerSet = function() {
@@ -309,8 +326,7 @@ var RampFsm = machina.Fsm.extend({
     this.paper = paper;
   },
   solve : function() {
-    // not the solution!!!!!
-    this.ramp.updatePingerPositions([3,6,12,24,48,96]);
+    this.ramp.updatePingerTimes([0.6,1.2,1.8,2.4,3.0,3.6], 1);
   },
   states : {
     'ramp_setup' : {
@@ -344,7 +360,7 @@ var RampFsm = machina.Fsm.extend({
     },
     'rolling' : {
       _onEnter : function() {
-        this.ramp.release(this.ball, 7);
+        this.ramp.release(this.ball);
         this.$interact.text('Reset');
       },
       solve : function() { return this.solve.apply(this, arguments); },
