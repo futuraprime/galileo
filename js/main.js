@@ -111,7 +111,6 @@ Ramp.prototype._placeBall = function(ball, position) {
   ball.move(position);
 };
 Ramp.prototype.positionFromTime = function(time, initialPosition) {
-  console.log(time, this.factor, initialPosition, time * time * this.factor + initialPosition);
   return Math.pow(time, 2) * this.factor + initialPosition;
 };
 Ramp.prototype.timeFromPosition = function(position, initialPosition) {
