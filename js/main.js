@@ -283,13 +283,14 @@ Pinger.prototype.ping = function() {
   playSound(audios[this.audioID]);
 };
 Pinger.prototype.moveTo = function(position, animate) {
-  console.log('moving to', position);
-  var self = this;
+  var self = this, moveStartX = this.x;
   if(animate) {
-    Snap.animate(this.x, position, function(val) {
-      self.group.attr('transform', 'translate3d('+position+'px,0,0)');
-    }, 250);
+    console.log('animating to', position);
+    Snap.animate(moveStartX, position, function(val) {
+      self.group.attr('transform', 'translate3d('+val+'px,0,0)');
+    }, 400, mina.easeout);
   } else {
+    console.log('moving to', position);
     this.group.attr('transform', 'translate3d('+position+'px,0,0)');
   }
   this.x = position;
