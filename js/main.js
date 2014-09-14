@@ -127,15 +127,17 @@ Ramp.prototype.release = function(ball, factor) {
   var pingerLocations = _.pluck(this.pingers, 'x');
   var nextPinger = this.pingers[0];
   var pingerIndex = 0;
-  // ok, so we can actually calculate the pingers right away here...
-  function placeFromTime(runningTime) {
-    return Math.pow((runningTime/1000), 2) * factor + initialPosition;
+  var times = [];
+  function positionFromTime(runningTime) {
+    return Math.pow((runningTime), 2) * factor + initialPosition;
   }
-  function timeFromPlace(place) {
-    // return initialPosition - 
+  // ok, so we can actually calculate the pingers right away here...
+  function timeFromPosition(position) {
+    var percent = self.getPercentByXPosition(position);
+    return Math.sqrt((percent - initialPosition) / factor);
   }
   for(var i=0,l=this.pingers.length;i<l;++i) {
-
+    times[i] = timeFromPosition(this.pingers[i].x);
   }
 
   ball.stepFn = function(timestamp) {
@@ -146,10 +148,11 @@ Ramp.prototype.release = function(ball, factor) {
     }
     var runningTime = timestamp - ball.start;
 
-    var distance = placeFromTime(runningTime);
+    var distance = positionFromTime(runningTime / 1000);
     self._placeBall(ball, distance);
     if(nextPinger && ball.x > nextPinger.x) {
       nextPinger.ping();
+      console.log(runningTime / 1000, distance, times[pingerIndex]);
       nextPinger = self.pingers[++pingerIndex];
     }
     if(distance < 120) {
