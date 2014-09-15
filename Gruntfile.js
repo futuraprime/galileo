@@ -1,11 +1,27 @@
 /* global module:false, require:false */
 var path = require('path');
+var marked = require('marked');
+var cheerio = require('cheerio');
 
 var folderMount = function folderMount(connect, point) {
   return connect.static(path.resolve(point));
 };
 
 module.exports = function(grunt) {
+  grunt.registerTask('parseMd', 'parse Markdown files into template', function() {
+    var files = grunt.file.expand('text/*.md');
+    var raw, cooked, name;
+    var $ = cheerio.load(grunt.file.read('index.html'));
+    for(var i=0,l=files.length;i<l;++i) {
+      name = path.basename(files[i], '.md');
+      raw = grunt.file.read(files[i]);
+      cooked = marked(raw);
+      $('#' + name).html(cooked);
+    }
+
+    grunt.file.write('index.html', $.html());
+  });
+
   function registerRobustTasks(name, tasks) {
     grunt.registerTask(name, function() {
       // so we don't have stupid issues with grunt crashing
@@ -60,6 +76,13 @@ module.exports = function(grunt) {
       },
       html : {
         files : ['./**/*.html'],
+        options : {
+          livereload : 4948
+        }
+      },
+      md : {
+        files : ['./text/*.md'],
+        tasks : ['parseMd'],
         options : {
           livereload : 4948
         }
